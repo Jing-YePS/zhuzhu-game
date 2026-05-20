@@ -1,0 +1,2345 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>银河奥特曼数学打怪兽</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #15131f;
+      --panel: rgba(255, 255, 255, 0.13);
+      --panel-strong: rgba(255, 255, 255, 0.19);
+      --line: rgba(255, 255, 255, 0.27);
+      --text: #fff8e8;
+      --muted: #d8f2ff;
+      --gold: #ffd45a;
+      --hero-red: #f74754;
+      --hero-silver: #f1f6ff;
+      --hero-blue: #34d9ff;
+      --green: #62e381;
+      --pink: #ff6fcf;
+      --orange: #ff9045;
+      --shadow: rgba(0, 0, 0, 0.34);
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow-x: hidden;
+      background: #15131f;
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 16%, rgba(255, 212, 90, 0.16), transparent 24%),
+        radial-gradient(circle at 82% 12%, rgba(98, 227, 129, 0.15), transparent 26%),
+        radial-gradient(circle at 78% 76%, rgba(255, 111, 207, 0.16), transparent 28%),
+        linear-gradient(145deg, #15131f 0%, #29333d 48%, #1c1928 100%);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      color: var(--ink);
+    }
+
+    .game {
+      position: relative;
+      isolation: isolate;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(14px, 3vw, 30px);
+      overflow: hidden;
+    }
+
+    .stars,
+    .stars::before,
+    .stars::after {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(255, 248, 232, 0.92) 0 1px, transparent 1.4px),
+        radial-gradient(circle, rgba(127, 227, 255, 0.78) 0 1.2px, transparent 1.6px);
+      background-size: 82px 74px, 126px 118px;
+      background-position: 4px 18px, 36px 52px;
+      opacity: 0.58;
+      z-index: -3;
+      animation: drift 24s linear infinite;
+    }
+
+    .stars::before {
+      content: "";
+      background-size: 136px 108px, 190px 144px;
+      background-position: 22px 4px, 0 76px;
+      opacity: 0.42;
+      animation-duration: 36s;
+    }
+
+    .stars::after {
+      content: "";
+      background-size: 226px 170px, 154px 202px;
+      background-position: 12px 92px, 84px 0;
+      opacity: 0.3;
+      animation-duration: 48s;
+    }
+
+    @keyframes drift {
+      to {
+        transform: translate3d(-90px, 40px, 0);
+      }
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      width: min(1120px, 100%);
+      min-width: 0;
+      margin: 0 auto 16px;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(25px, 5vw, 44px);
+      line-height: 1.08;
+      font-weight: 900;
+      text-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: clamp(15px, 2vw, 18px);
+      font-weight: 700;
+    }
+
+    .scoreboard {
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 16px 34px var(--shadow);
+    }
+
+    .pause-button {
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 8px;
+      background: #34d9ff;
+      color: #071d2b;
+      font-weight: 1000;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.24), 0 12px 20px rgba(0, 0, 0, 0.18);
+    }
+
+    .gem {
+      width: clamp(30px, 6vw, 42px);
+      height: clamp(30px, 6vw, 42px);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      transition: transform 220ms ease, background 220ms ease;
+    }
+
+    .gem svg {
+      width: 70%;
+      height: 70%;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.22));
+    }
+
+    .gem.done {
+      background: rgba(255, 212, 90, 0.95);
+      transform: scale(1.08);
+    }
+
+    .gem.miss {
+      background: rgba(255, 91, 91, 0.9);
+      transform: scale(0.94);
+    }
+
+    .arena {
+      position: relative;
+      flex: 1;
+      width: min(1120px, 100%);
+      min-width: 0;
+      min-height: 500px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+    }
+
+    .stage {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(170px, 1fr) minmax(250px, 1.08fr) minmax(170px, 1fr);
+      align-items: end;
+      min-width: 0;
+      min-height: clamp(290px, 48vh, 450px);
+      border-radius: 8px;
+      padding: clamp(12px, 3vw, 26px);
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05));
+      background-size: 38px 38px, 38px 38px, auto;
+      box-shadow: 0 22px 54px rgba(0, 0, 0, 0.28);
+      overflow: hidden;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 27%;
+      background:
+        linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.2)),
+        repeating-linear-gradient(90deg, rgba(255, 212, 90, 0.24) 0 3px, transparent 3px 28px);
+      clip-path: polygon(0 35%, 100% 8%, 100% 100%, 0% 100%);
+      opacity: 0.86;
+      z-index: -1;
+    }
+
+    .stage::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 18%;
+      background: linear-gradient(180deg, rgba(76, 238, 177, 0.14), rgba(39, 28, 40, 0.72));
+      z-index: -2;
+    }
+
+    .hero-side,
+    .monster-side {
+      position: relative;
+      display: grid;
+      place-items: end center;
+      min-width: 0;
+    }
+
+    .hero-wrap,
+    .monster-wrap {
+      position: relative;
+      width: min(230px, 100%);
+      aspect-ratio: 0.72;
+      display: grid;
+      place-items: end center;
+    }
+
+    .hero-wrap {
+      animation: heroIdle 1.8s ease-in-out infinite;
+      transform-origin: 50% 100%;
+    }
+
+    .hero-wrap.answering {
+      animation: heroStrike 520ms ease-out;
+    }
+
+    .hero-wrap.hurt {
+      animation: heroHurt 680ms cubic-bezier(0.2, 0.9, 0.28, 1);
+    }
+
+    @keyframes heroIdle {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-7px);
+      }
+    }
+
+    @keyframes heroStrike {
+      0% {
+        transform: translateX(0) rotate(0);
+      }
+
+      44% {
+        transform: translateX(42px) rotate(4deg);
+      }
+
+      100% {
+        transform: translateX(0) rotate(0);
+      }
+    }
+
+    @keyframes heroHurt {
+      0% {
+        transform: translateX(0) rotate(0) scale(1);
+        filter: none;
+      }
+
+      18% {
+        transform: translateX(-30px) rotate(-10deg) scale(0.96);
+        filter: drop-shadow(0 0 18px rgba(255, 111, 91, 0.88));
+      }
+
+      38% {
+        transform: translateX(-18px) rotate(7deg) scale(0.98);
+      }
+
+      62% {
+        transform: translateX(-9px) rotate(-4deg) scale(1);
+      }
+
+      100% {
+        transform: translateX(0) rotate(0) scale(1);
+        filter: none;
+      }
+    }
+
+    .hero-svg,
+    .monster-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 20px 22px rgba(0, 0, 0, 0.34));
+    }
+
+    .hero-core {
+      animation: pulseCore 980ms ease-in-out infinite;
+      transform-origin: 50% 46%;
+    }
+
+    .hero-wrap.hurt .hero-core {
+      fill: #ff263d;
+      stroke: #ffe1e1;
+      animation: redCoreAlarm 160ms steps(2, end) infinite;
+      filter: drop-shadow(0 0 20px rgba(255, 38, 61, 1));
+    }
+
+    @keyframes pulseCore {
+      50% {
+        filter: drop-shadow(0 0 14px rgba(52, 217, 255, 0.98));
+        transform: scale(1.08);
+      }
+    }
+
+    @keyframes redCoreAlarm {
+      0% {
+        fill: #ff263d;
+        transform: scale(1);
+        filter: drop-shadow(0 0 10px rgba(255, 38, 61, 0.8));
+      }
+
+      100% {
+        fill: #ffb000;
+        transform: scale(1.16);
+        filter: drop-shadow(0 0 26px rgba(255, 55, 61, 1));
+      }
+    }
+
+    .monster-wrap {
+      transform-origin: 50% 100%;
+      animation: monsterIdle 1.2s ease-in-out infinite;
+    }
+
+    @keyframes monsterIdle {
+      0%,
+      100% {
+        transform: rotate(-1deg) translateY(0);
+      }
+
+      50% {
+        transform: rotate(1.5deg) translateY(-8px);
+      }
+    }
+
+    .monster-wrap.hit {
+      animation: monsterHit 340ms ease-in-out 3;
+    }
+
+    .monster-wrap.attack {
+      animation: monsterAttack 620ms cubic-bezier(0.18, 0.88, 0.32, 1);
+    }
+
+    @keyframes monsterHit {
+      0%,
+      100% {
+        transform: translateX(0) rotate(0);
+      }
+
+      25% {
+        transform: translateX(12px) rotate(4deg);
+      }
+
+      70% {
+        transform: translateX(-14px) rotate(-5deg);
+      }
+    }
+
+    @keyframes monsterAttack {
+      0%,
+      100% {
+        transform: translateX(0) rotate(0);
+      }
+
+      28% {
+        transform: translateX(-52px) rotate(-9deg) scale(1.04);
+      }
+
+      52% {
+        transform: translateX(-32px) rotate(5deg) scale(1.02);
+      }
+    }
+
+    .monster-wrap.defeated .monster-svg {
+      opacity: 0;
+      transform: scale(0.72);
+      transition: opacity 240ms ease, transform 240ms ease;
+    }
+
+    .monster-name,
+    .hero-name {
+      position: absolute;
+      left: 50%;
+      bottom: -4px;
+      transform: translateX(-50%);
+      padding: 6px 10px;
+      min-width: max-content;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.36);
+      background: rgba(21, 19, 31, 0.74);
+      color: #fff9ec;
+      font-weight: 900;
+      font-size: clamp(13px, 2vw, 16px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+    }
+
+    .question-zone {
+      align-self: start;
+      display: grid;
+      gap: 10px;
+      place-items: center;
+      min-width: 0;
+      padding-top: clamp(2px, 2vw, 18px);
+    }
+
+    .round-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .level-pill {
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: var(--gold);
+      color: #352000;
+      font-weight: 900;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.22);
+    }
+
+    .timer-pill,
+    .score-pill {
+      min-width: 76px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      background: rgba(21, 19, 31, 0.72);
+      color: #fff8e8;
+      text-align: center;
+      font-weight: 1000;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .timer-pill {
+      color: #95ffac;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-pill.danger {
+      color: #ffef73;
+      animation: timerDanger 320ms ease-in-out infinite alternate;
+    }
+
+    @keyframes timerDanger {
+      to {
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 12px rgba(255, 212, 90, 0.9));
+      }
+    }
+
+    .speech {
+      position: relative;
+      width: min(340px, 100%);
+      min-height: 116px;
+      padding: clamp(14px, 3vw, 20px);
+      border-radius: 8px;
+      background: rgba(255, 248, 232, 0.96);
+      color: #22202a;
+      text-align: center;
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.24);
+      border: 3px solid rgba(255, 212, 90, 0.94);
+    }
+
+    .speech::after {
+      content: "";
+      position: absolute;
+      right: -18px;
+      top: 42px;
+      width: 26px;
+      height: 28px;
+      background: rgba(255, 248, 232, 0.96);
+      clip-path: polygon(0 20%, 100% 50%, 0 80%);
+    }
+
+    .monster-line {
+      margin: 0 0 6px;
+      color: #6b3756;
+      font-size: clamp(14px, 2vw, 17px);
+      font-weight: 900;
+    }
+
+    .problem {
+      min-height: 1.2em;
+      font-size: clamp(38px, 8vw, 68px);
+      line-height: 1.03;
+      font-weight: 1000;
+      color: #15131f;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .answer-panel {
+      display: grid;
+      grid-template-columns: minmax(190px, 1fr) auto;
+      gap: 12px;
+      align-items: stretch;
+      width: min(620px, 100%);
+      min-width: 0;
+      margin: 0 auto;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.24);
+    }
+
+    .answer-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 74px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.92);
+      color: #15131f;
+      font-size: clamp(36px, 7vw, 58px);
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.08);
+    }
+
+    .answer-display.empty {
+      color: rgba(21, 19, 31, 0.38);
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(52px, 1fr));
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .key,
+    .action {
+      min-width: 0;
+      min-height: 52px;
+      border-radius: 8px;
+      font-weight: 1000;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25), 0 10px 18px rgba(0, 0, 0, 0.18);
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+      touch-action: manipulation;
+    }
+
+    .key {
+      background: #f8f6ee;
+      color: #15131f;
+      font-size: 25px;
+    }
+
+    .action {
+      padding: 0 16px;
+      background: var(--green);
+      font-size: 20px;
+      color: #07321c;
+      white-space: nowrap;
+    }
+
+    .clear {
+      background: #ffd45a;
+      color: #352000;
+    }
+
+    .key:active,
+    .action:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25), 0 6px 12px rgba(0, 0, 0, 0.14);
+    }
+
+    .action:disabled,
+    .key:disabled {
+      cursor: default;
+      filter: grayscale(0.45) brightness(0.86);
+      transform: none;
+    }
+
+    .feedback {
+      min-height: 32px;
+      text-align: center;
+      font-size: clamp(18px, 3vw, 24px);
+      font-weight: 1000;
+      text-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .feedback.good {
+      color: #95ffac;
+    }
+
+    .feedback.try {
+      color: #ffd45a;
+    }
+
+    .beam {
+      position: absolute;
+      left: 24%;
+      right: 24%;
+      top: 46%;
+      height: clamp(16px, 3vw, 28px);
+      background: linear-gradient(90deg, transparent 0%, rgba(52, 217, 255, 0.92) 18%, rgba(255, 212, 90, 0.98) 56%, transparent 100%);
+      filter: blur(2px) drop-shadow(0 0 12px rgba(52, 217, 255, 0.85));
+      transform: scaleX(0);
+      transform-origin: left center;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .beam.fire {
+      animation: fireBeam 560ms ease-out;
+    }
+
+    .stage.wrong {
+      animation: stageWrongShake 360ms ease-in-out;
+    }
+
+    @keyframes stageWrongShake {
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      22% {
+        transform: translateX(-7px);
+      }
+
+      48% {
+        transform: translateX(8px);
+      }
+
+      72% {
+        transform: translateX(-4px);
+      }
+    }
+
+    @keyframes fireBeam {
+      0% {
+        transform: scaleX(0);
+        opacity: 0;
+      }
+
+      20%,
+      68% {
+        transform: scaleX(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scaleX(1);
+        opacity: 0;
+      }
+    }
+
+    .impact {
+      position: absolute;
+      left: 18%;
+      bottom: 35%;
+      width: 126px;
+      height: 126px;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      transform: scale(0.5) rotate(-15deg);
+      transform-origin: center;
+      pointer-events: none;
+      z-index: 8;
+    }
+
+    .impact::before,
+    .impact::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      background: #ffd45a;
+      clip-path: polygon(50% 0, 59% 33%, 96% 19%, 70% 50%, 100% 72%, 63% 66%, 54% 100%, 42% 67%, 5% 82%, 30% 51%, 0 29%, 38% 35%);
+      filter: drop-shadow(0 0 18px rgba(255, 212, 90, 0.9));
+    }
+
+    .impact::after {
+      inset: 24px;
+      background: #ff5b5b;
+      transform: rotate(18deg);
+      opacity: 0.9;
+    }
+
+    .impact span {
+      position: relative;
+      z-index: 1;
+      color: #15131f;
+      font-size: 30px;
+      font-weight: 1000;
+      text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .impact.show {
+      animation: impactPop 720ms ease-out;
+    }
+
+    @keyframes impactPop {
+      0% {
+        opacity: 0;
+        transform: scale(0.35) rotate(-22deg);
+      }
+
+      20%,
+      58% {
+        opacity: 1;
+        transform: scale(1) rotate(8deg);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.18) rotate(18deg);
+      }
+    }
+
+    .answer-bubble {
+      position: absolute;
+      left: 18%;
+      top: 20%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(52, 217, 255, 0.94);
+      color: #071d2b;
+      font-size: clamp(20px, 4vw, 34px);
+      font-weight: 1000;
+      transform: translateY(12px) scale(0.8);
+      opacity: 0;
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.24);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .answer-bubble.show {
+      animation: popAnswer 1s ease-out;
+    }
+
+    @keyframes popAnswer {
+      0% {
+        transform: translateY(12px) scale(0.8);
+        opacity: 0;
+      }
+
+      20%,
+      72% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-16px) scale(0.96);
+        opacity: 0;
+      }
+    }
+
+    .explosion {
+      position: absolute;
+      right: 12%;
+      bottom: 24%;
+      width: 190px;
+      height: 190px;
+      transform: translate(50%, 20%) scale(0);
+      opacity: 0;
+      z-index: 7;
+      pointer-events: none;
+    }
+
+    .explosion.boom {
+      animation: boom 760ms ease-out;
+    }
+
+    .explosion span {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      background: var(--gold);
+      box-shadow: 0 0 22px rgba(255, 212, 90, 0.92);
+      transform: translate(-50%, -50%) rotate(var(--r)) translateY(var(--d));
+    }
+
+    .explosion span:nth-child(2n) {
+      background: #ff6f4f;
+    }
+
+    .explosion span:nth-child(3n) {
+      background: #34d9ff;
+    }
+
+    @keyframes boom {
+      0% {
+        transform: translate(50%, 20%) scale(0.2);
+        opacity: 0;
+        filter: blur(0);
+      }
+
+      20% {
+        transform: translate(50%, 20%) scale(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(50%, 20%) scale(1.65);
+        opacity: 0;
+        filter: blur(2px);
+      }
+    }
+
+    .finale {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        linear-gradient(180deg, rgba(21, 19, 31, 0.38), rgba(21, 19, 31, 0.92)),
+        radial-gradient(circle at 50% 78%, rgba(255, 212, 90, 0.18), transparent 30%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 360ms ease;
+    }
+
+    .finale.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #fireworks {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .final-card {
+      position: relative;
+      width: min(760px, 92vw);
+      text-align: center;
+      padding: clamp(26px, 6vw, 54px);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.42);
+      backdrop-filter: blur(10px);
+    }
+
+    .final-card h2 {
+      margin: 0;
+      font-size: clamp(42px, 10vw, 92px);
+      line-height: 1.05;
+      color: #fff8e8;
+      text-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .restart {
+      margin-top: 22px;
+      min-height: 54px;
+      padding: 0 22px;
+      border-radius: 8px;
+      background: var(--gold);
+      color: #352000;
+      font-size: 20px;
+      font-weight: 1000;
+      box-shadow: 0 7px 0 rgba(0, 0, 0, 0.25), 0 14px 24px rgba(0, 0, 0, 0.22);
+    }
+
+    .defeat {
+      position: fixed;
+      inset: 0;
+      z-index: 22;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255, 91, 91, 0.28), transparent 28%),
+        linear-gradient(180deg, rgba(21, 19, 31, 0.55), rgba(21, 19, 31, 0.96));
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 360ms ease;
+    }
+
+    .defeat.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .defeat-card {
+      position: relative;
+      width: min(760px, 92vw);
+      text-align: center;
+      padding: clamp(22px, 5vw, 42px);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      background: rgba(41, 28, 38, 0.82);
+      box-shadow: 0 30px 78px rgba(0, 0, 0, 0.48);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .defeat-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(115deg, rgba(255, 91, 91, 0.13) 0 8px, transparent 8px 22px);
+      pointer-events: none;
+    }
+
+    .defeat-scene {
+      position: relative;
+      width: min(520px, 100%);
+      height: clamp(220px, 38vw, 310px);
+      margin: 0 auto 18px;
+      z-index: 1;
+    }
+
+    .fallen-hero {
+      position: absolute;
+      left: 50%;
+      bottom: 24px;
+      width: 280px;
+      height: 112px;
+      transform: translateX(-50%) rotate(-4deg);
+      filter: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.34));
+    }
+
+    .fallen-body {
+      position: absolute;
+      left: 60px;
+      top: 34px;
+      width: 160px;
+      height: 52px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #f1f6ff 0 22%, #f74754 22% 78%, #f1f6ff 78%);
+      border: 4px solid rgba(255, 255, 255, 0.86);
+    }
+
+    .fallen-head {
+      position: absolute;
+      left: 18px;
+      top: 22px;
+      width: 62px;
+      height: 72px;
+      background: #f1f6ff;
+      border: 4px solid rgba(255, 255, 255, 0.86);
+      clip-path: polygon(50% 0, 92% 32%, 76% 100%, 24% 100%, 8% 32%);
+    }
+
+    .fallen-core {
+      position: absolute;
+      left: 126px;
+      top: 44px;
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: #ff263d;
+      border: 3px solid #ffe1e1;
+      box-shadow: 0 0 24px rgba(255, 38, 61, 1);
+      animation: redCoreAlarm 150ms steps(2, end) infinite;
+    }
+
+    .fallen-leg {
+      position: absolute;
+      top: 48px;
+      width: 78px;
+      height: 26px;
+      border-radius: 8px;
+      background: #f1f6ff;
+      border: 4px solid rgba(255, 255, 255, 0.86);
+    }
+
+    .fallen-leg.left {
+      left: 196px;
+      transform: rotate(12deg);
+    }
+
+    .fallen-leg.right {
+      left: 203px;
+      top: 78px;
+      transform: rotate(-8deg);
+    }
+
+    .sitting-monster {
+      position: absolute;
+      left: 50%;
+      bottom: 80px;
+      width: 190px;
+      height: 190px;
+      transform: translateX(-50%);
+      border-radius: 48% 48% 42% 42%;
+      background: linear-gradient(180deg, #7f5cff, #5a38df);
+      border: 5px solid rgba(255, 255, 255, 0.78);
+      box-shadow: 0 18px 0 rgba(0, 0, 0, 0.2);
+      animation: sitBounce 360ms ease-in-out infinite alternate;
+      z-index: 2;
+    }
+
+    @keyframes sitBounce {
+      to {
+        transform: translateX(-50%) translateY(10px) scaleY(0.96);
+      }
+    }
+
+    .sit-horn {
+      position: absolute;
+      top: -28px;
+      width: 54px;
+      height: 54px;
+      background: #fff8e8;
+      clip-path: polygon(50% 0, 100% 100%, 0 70%);
+    }
+
+    .sit-horn.left {
+      left: -12px;
+      transform: rotate(-26deg);
+    }
+
+    .sit-horn.right {
+      right: -12px;
+      transform: scaleX(-1) rotate(-26deg);
+    }
+
+    .sit-eye {
+      position: absolute;
+      top: 58px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #15131f;
+      box-shadow: inset 9px -7px 0 #95ffac;
+    }
+
+    .sit-eye.left {
+      left: 48px;
+    }
+
+    .sit-eye.right {
+      right: 48px;
+    }
+
+    .sit-mouth {
+      position: absolute;
+      left: 55px;
+      top: 106px;
+      width: 80px;
+      height: 34px;
+      border-radius: 0 0 38px 38px;
+      background: #15131f;
+    }
+
+    .ouch-cloud {
+      position: absolute;
+      left: 50%;
+      top: 12px;
+      transform: translateX(-50%);
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: #ffd45a;
+      color: #352000;
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 1000;
+      box-shadow: 0 12px 22px rgba(0, 0, 0, 0.24);
+      animation: ouchJump 500ms ease-in-out infinite alternate;
+      z-index: 3;
+    }
+
+    @keyframes ouchJump {
+      to {
+        transform: translateX(-50%) translateY(-10px) rotate(-2deg);
+      }
+    }
+
+    .defeat-card h2 {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      color: #fff8e8;
+      font-size: clamp(38px, 8vw, 82px);
+      line-height: 1.02;
+      text-shadow: 0 5px 0 rgba(0, 0, 0, 0.28);
+    }
+
+    .defeat-card .restart {
+      position: relative;
+      z-index: 1;
+    }
+
+    .pause-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 24;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(21, 19, 31, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 260ms ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .pause-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .pause-card {
+      width: min(520px, 92vw);
+      padding: clamp(26px, 6vw, 46px);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      background: rgba(255, 255, 255, 0.13);
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+      text-align: center;
+    }
+
+    .pause-card h2 {
+      margin: 0;
+      font-size: clamp(38px, 8vw, 72px);
+      line-height: 1.05;
+      color: #fff8e8;
+      text-shadow: 0 5px 0 rgba(0, 0, 0, 0.24);
+    }
+
+    .monster-horn,
+    .monster-tooth {
+      filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.16));
+    }
+
+    @media (max-width: 820px) {
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .scoreboard {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        justify-items: center;
+      }
+
+      .pause-button {
+        width: 100%;
+        padding: 0 8px;
+      }
+
+      .arena {
+        width: 100%;
+        min-height: 0;
+      }
+
+      .stage {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+        min-height: 420px;
+      }
+
+      .question-zone {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        width: 100%;
+        max-width: 100%;
+        padding-top: 0;
+      }
+
+      .hero-side,
+      .monster-side {
+        grid-row: 2;
+      }
+
+      .hero-wrap,
+      .monster-wrap {
+        width: min(180px, 42vw);
+      }
+
+      .speech {
+        max-width: 100%;
+        min-height: 98px;
+      }
+
+      .speech::after {
+        right: 48%;
+        top: auto;
+        bottom: -20px;
+        transform: rotate(90deg);
+      }
+
+      .answer-panel {
+        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .keypad {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .action {
+        min-height: 56px;
+      }
+
+      .beam {
+        left: 22%;
+        right: 22%;
+        top: 64%;
+      }
+
+      .answer-bubble {
+        left: 7%;
+        top: 48%;
+      }
+
+      .impact {
+        left: 10%;
+        bottom: 25%;
+        width: 104px;
+        height: 104px;
+      }
+
+      .explosion {
+        right: 23%;
+        bottom: 18%;
+        width: 148px;
+        height: 148px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .game {
+        padding: 12px;
+        align-items: flex-start;
+      }
+
+      .topbar,
+      .arena {
+        width: min(100%, 366px);
+        max-width: calc(100vw - 24px);
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+      }
+
+      .stage {
+        min-height: 370px;
+        padding: 10px;
+      }
+
+      .hero-wrap,
+      .monster-wrap {
+        width: min(140px, 36vw);
+      }
+
+      .monster-wrap {
+        transform: translateX(-6px);
+      }
+
+      .speech {
+        width: 100%;
+        padding: 12px;
+      }
+
+      .problem {
+        font-size: 43px;
+      }
+
+      .keypad {
+        gap: 7px;
+      }
+
+      .key,
+      .action {
+        min-height: 50px;
+      }
+
+      .action {
+        padding: 0 4px;
+        font-size: 17px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game" aria-label="银河奥特曼数学打怪兽">
+    <div class="stars"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <h1>银河奥特曼数学打怪兽</h1>
+        <p class="subtitle">50 以内加减法挑战</p>
+      </div>
+      <div class="scoreboard" aria-label="通关进度">
+        <button class="pause-button" id="pauseBtn" type="button">暂停</button>
+        <div class="gem" data-gem="0" aria-label="第一题">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#34d9ff" d="M32 4 58 25 48 58H16L6 25z"/><path fill="#fff8e8" opacity=".7" d="M32 10 47 26 39 51H25L17 26z"/></svg>
+        </div>
+        <div class="gem" data-gem="1" aria-label="第二题">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#62e381" d="M32 4 58 25 48 58H16L6 25z"/><path fill="#fff8e8" opacity=".7" d="M32 10 47 26 39 51H25L17 26z"/></svg>
+        </div>
+        <div class="gem" data-gem="2" aria-label="第三题">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#ff6fcf" d="M32 4 58 25 48 58H16L6 25z"/><path fill="#fff8e8" opacity=".7" d="M32 10 47 26 39 51H25L17 26z"/></svg>
+        </div>
+        <div class="gem" data-gem="3" aria-label="第四题">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#ffd45a" d="M32 4 58 25 48 58H16L6 25z"/><path fill="#fff8e8" opacity=".7" d="M32 10 47 26 39 51H25L17 26z"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <section class="arena">
+      <div class="stage">
+        <div class="hero-side">
+          <div class="hero-wrap" id="hero">
+            <svg class="hero-svg" viewBox="0 0 220 310" role="img" aria-label="银河奥特曼">
+              <defs>
+                <linearGradient id="silver" x1="0" x2="1" y1="0" y2="1">
+                  <stop stop-color="#ffffff" offset="0"/>
+                  <stop stop-color="#d7e2ef" offset=".52"/>
+                  <stop stop-color="#aebdce" offset="1"/>
+                </linearGradient>
+                <linearGradient id="redSuit" x1="0" x2="1">
+                  <stop stop-color="#ff6b72" offset="0"/>
+                  <stop stop-color="#d61838" offset="1"/>
+                </linearGradient>
+                <linearGradient id="blueCrystal" x1="0" x2="1" y1="0" y2="1">
+                  <stop stop-color="#b7fbff" offset="0"/>
+                  <stop stop-color="#22cdf8" offset=".55"/>
+                  <stop stop-color="#1170ff" offset="1"/>
+                </linearGradient>
+              </defs>
+              <ellipse cx="108" cy="292" rx="74" ry="13" fill="rgba(0,0,0,.28)"/>
+              <path d="M109 8 136 38 129 87 111 104 91 87 84 38z" fill="url(#silver)" stroke="#f9fbff" stroke-width="5"/>
+              <path d="M87 43 61 58 83 70z" fill="url(#silver)" stroke="#f9fbff" stroke-width="4"/>
+              <path d="M132 43 159 58 137 70z" fill="url(#silver)" stroke="#f9fbff" stroke-width="4"/>
+              <path d="M93 61c10-9 23-9 33 0-5 11-28 11-33 0z" fill="#fff5a6"/>
+              <path d="M89 91h42l20 92-22 70H91l-22-70z" fill="url(#redSuit)" stroke="#f5f8ff" stroke-width="5"/>
+              <path d="M110 98 92 171l18 69 18-69z" fill="url(#silver)" opacity=".96"/>
+              <path d="M70 108 37 151 55 169 85 136z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M147 108 188 133 177 155 135 136z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M54 168 34 206 51 217 72 176z" fill="url(#redSuit)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M176 155 193 195 174 203 158 164z" fill="url(#redSuit)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M92 249 74 292 94 298 111 255z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M126 249 143 292 123 298 108 255z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M95 270h-28c-10 0-14 9-8 17 11 8 29 8 42 2z" fill="#ff4859"/>
+              <path d="M124 270h28c10 0 14 9 8 17-11 8-29 8-42 2z" fill="#ff4859"/>
+              <path class="hero-core" d="M110 120 128 142 118 168h-17l-10-26z" fill="url(#blueCrystal)" stroke="#e7feff" stroke-width="4"/>
+              <path d="M106 16 114 16 112 47 108 47z" fill="#34d9ff"/>
+            </svg>
+            <div class="hero-name">银河奥特曼</div>
+          </div>
+        </div>
+
+        <div class="question-zone">
+          <div class="round-tools">
+            <div class="level-pill" id="levelText">第 1 题</div>
+            <div class="timer-pill" id="timerText">8 秒</div>
+            <div class="score-pill" id="scoreText">对 0 错 0</div>
+          </div>
+          <div class="speech" aria-live="polite">
+            <p class="monster-line" id="monsterLine">怪兽出题</p>
+            <div class="problem" id="problemText">12 + 7 = ?</div>
+          </div>
+        </div>
+
+        <div class="monster-side">
+          <div class="monster-wrap" id="monster">
+            <svg class="monster-svg" id="monsterSvg" viewBox="0 0 220 300" role="img" aria-label="怪兽">
+            </svg>
+            <div class="monster-name" id="monsterName">岩角怪兽</div>
+          </div>
+        </div>
+
+        <div class="beam" id="beam"></div>
+        <div class="answer-bubble" id="answerBubble">答案是 19！</div>
+        <div class="impact" id="impact" aria-hidden="true"><span>啊！</span></div>
+        <div class="explosion" id="explosion" aria-hidden="true"></div>
+      </div>
+
+      <div class="answer-panel">
+        <div class="answer-display empty" id="answerDisplay" aria-live="polite">?</div>
+        <div class="keypad" aria-label="数字键盘">
+          <button class="key" type="button" data-key="1">1</button>
+          <button class="key" type="button" data-key="2">2</button>
+          <button class="key" type="button" data-key="3">3</button>
+          <button class="action clear" type="button" id="clearBtn">清空</button>
+          <button class="key" type="button" data-key="4">4</button>
+          <button class="key" type="button" data-key="5">5</button>
+          <button class="key" type="button" data-key="6">6</button>
+          <button class="action" type="button" id="submitBtn">发射</button>
+          <button class="key" type="button" data-key="7">7</button>
+          <button class="key" type="button" data-key="8">8</button>
+          <button class="key" type="button" data-key="9">9</button>
+          <button class="key" type="button" data-key="0">0</button>
+        </div>
+      </div>
+
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <section class="finale" id="finale" aria-hidden="true">
+    <canvas id="fireworks"></canvas>
+    <div class="final-card">
+      <h2>太棒了，zhuzhu！</h2>
+      <button class="restart" id="restartBtn" type="button">再玩一次</button>
+    </div>
+  </section>
+
+  <section class="defeat" id="defeat" aria-hidden="true">
+    <div class="defeat-card">
+      <div class="defeat-scene" aria-hidden="true">
+        <div class="fallen-hero">
+          <span class="fallen-head"></span>
+          <span class="fallen-body"></span>
+          <span class="fallen-core"></span>
+          <span class="fallen-leg left"></span>
+          <span class="fallen-leg right"></span>
+        </div>
+        <div class="sitting-monster">
+          <span class="sit-horn left"></span>
+          <span class="sit-horn right"></span>
+          <span class="sit-eye left"></span>
+          <span class="sit-eye right"></span>
+          <span class="sit-mouth"></span>
+        </div>
+        <div class="ouch-cloud">嗷嗷叫！</div>
+      </div>
+      <h2>我的妈呀，你太笨了</h2>
+      <button class="restart" id="defeatRestartBtn" type="button">再挑战一次</button>
+    </div>
+  </section>
+
+  <section class="pause-overlay" id="pauseOverlay" aria-hidden="true">
+    <div class="pause-card">
+      <h2>游戏已暂停</h2>
+      <button class="restart" id="resumeBtn" type="button">继续</button>
+    </div>
+  </section>
+
+  <script>
+    const monsters = [
+      {
+        name: "岩角怪兽",
+        main: "#7f5cff",
+        belly: "#ffd45a",
+        spike: "#fff8e8",
+        eye: "#95ffac"
+      },
+      {
+        name: "泡泡怪兽",
+        main: "#34d9ff",
+        belly: "#ff6fcf",
+        spike: "#fff8e8",
+        eye: "#ffd45a"
+      },
+      {
+        name: "火焰怪兽",
+        main: "#ff7c43",
+        belly: "#62e381",
+        spike: "#2b2432",
+        eye: "#fff8e8"
+      },
+      {
+        name: "星爪怪兽",
+        main: "#62e381",
+        belly: "#7f5cff",
+        spike: "#ffd45a",
+        eye: "#ff6fcf"
+      }
+    ];
+
+    const TOTAL_QUESTIONS = 4;
+    const ROUND_SECONDS = 8;
+
+    const levelText = document.getElementById("levelText");
+    const timerText = document.getElementById("timerText");
+    const scoreText = document.getElementById("scoreText");
+    const monsterLine = document.getElementById("monsterLine");
+    const problemText = document.getElementById("problemText");
+    const monsterName = document.getElementById("monsterName");
+    const monsterSvg = document.getElementById("monsterSvg");
+    const stage = document.querySelector(".stage");
+    const monster = document.getElementById("monster");
+    const hero = document.getElementById("hero");
+    const beam = document.getElementById("beam");
+    const explosion = document.getElementById("explosion");
+    const answerBubble = document.getElementById("answerBubble");
+    const impact = document.getElementById("impact");
+    const answerDisplay = document.getElementById("answerDisplay");
+    const feedback = document.getElementById("feedback");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const submitBtn = document.getElementById("submitBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const keypadButtons = [...document.querySelectorAll(".key, .action")];
+    const finale = document.getElementById("finale");
+    const defeat = document.getElementById("defeat");
+    const pauseOverlay = document.getElementById("pauseOverlay");
+    const restartBtn = document.getElementById("restartBtn");
+    const defeatRestartBtn = document.getElementById("defeatRestartBtn");
+    const resumeBtn = document.getElementById("resumeBtn");
+    const fireworksCanvas = document.getElementById("fireworks");
+    const fireworksCtx = fireworksCanvas.getContext("2d");
+
+    let level = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let results = [];
+    let answerValue = "";
+    let problem = makeProblem();
+    let locked = false;
+    let paused = false;
+    let gameOver = false;
+    let roundTimer = null;
+    let roundTicker = null;
+    let fireworksTimer = null;
+    let defeatScreamTimer = null;
+    let defeatRoarTimer = null;
+    let particles = [];
+    let audioCtx = null;
+    let finalMusicTimer = null;
+    let finalMusicStopTime = 0;
+
+    function makeProblem() {
+      const isAdd = Math.random() > 0.45;
+      if (isAdd) {
+        const a = randomInt(3, 45);
+        const b = randomInt(1, 50 - a);
+        return { a, b, op: "+", answer: a + b };
+      }
+
+      const a = randomInt(6, 50);
+      const b = randomInt(1, a);
+      return { a, b, op: "-", answer: a - b };
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function monsterMarkup(config, index) {
+      const extra = index === 1
+        ? '<circle cx="62" cy="95" r="13" fill="rgba(255,255,255,.42)"/><circle cx="155" cy="78" r="10" fill="rgba(255,255,255,.38)"/><circle cx="167" cy="142" r="14" fill="rgba(255,255,255,.34)"/>'
+        : index === 2
+          ? '<path d="M74 50c6-32 23-34 30 0 7-28 27-30 33 2 5-21 21-22 24 3-22-15-56-10-87-5z" fill="#ffd45a"/>'
+          : index === 3
+            ? '<path d="M110 27 122 54 151 43 139 73 168 86 136 92 141 124 110 104 79 124 84 92 52 86 81 73 69 43 98 54z" fill="#ffd45a" opacity=".78"/>'
+            : '<path class="monster-horn" d="M60 76 35 34 80 58zM160 76l25-42-45 24z" fill="' + config.spike + '"/>';
+
+      return `
+        <ellipse cx="110" cy="285" rx="72" ry="14" fill="rgba(0,0,0,.28)"/>
+        ${extra}
+        <path d="M62 113c-24 14-34 43-30 79 5 53 40 86 79 86s76-33 79-86c3-36-8-65-31-79-2-45-25-74-49-74s-46 29-48 74z" fill="${config.main}" stroke="rgba(255,255,255,.76)" stroke-width="5"/>
+        <path d="M80 160c3 48 15 82 30 82s28-34 31-82c-18 12-43 12-61 0z" fill="${config.belly}" opacity=".95"/>
+        <circle cx="83" cy="115" r="15" fill="#15131f"/>
+        <circle cx="137" cy="115" r="15" fill="#15131f"/>
+        <circle cx="88" cy="111" r="6" fill="${config.eye}"/>
+        <circle cx="142" cy="111" r="6" fill="${config.eye}"/>
+        <path d="M81 145c18 16 42 16 60 0" fill="none" stroke="#15131f" stroke-width="9" stroke-linecap="round"/>
+        <path class="monster-tooth" d="M94 148 101 167 109 149zM121 149l8 18 8-19z" fill="#fff8e8"/>
+        <path d="M48 170 18 148 14 171 45 194zM172 170l30-22 4 23-31 23z" fill="${config.main}" stroke="rgba(255,255,255,.68)" stroke-width="5"/>
+        <path d="M74 251 57 286h36l9-32zM146 251l17 35h-36l-9-32z" fill="${config.main}" stroke="rgba(255,255,255,.68)" stroke-width="5"/>
+        <path d="M57 287h38" stroke="#15131f" stroke-width="7" stroke-linecap="round"/>
+        <path d="M125 287h38" stroke="#15131f" stroke-width="7" stroke-linecap="round"/>
+      `;
+    }
+
+    function renderLevel() {
+      if (gameOver) {
+        return;
+      }
+
+      const config = monsters[level];
+      problem = makeProblem();
+      answerValue = "";
+      locked = false;
+      levelText.textContent = `第 ${level + 1}/${TOTAL_QUESTIONS} 题`;
+      monsterLine.textContent = `${config.name} 出题`;
+      problemText.textContent = `${problem.a} ${problem.op} ${problem.b} = ?`;
+      monsterName.textContent = config.name;
+      monsterSvg.innerHTML = monsterMarkup(config, level);
+      monster.classList.remove("hit", "attack", "defeated");
+      hero.classList.remove("answering", "hurt");
+      stage.classList.remove("wrong");
+      beam.classList.remove("fire");
+      explosion.classList.remove("boom");
+      answerBubble.classList.remove("show");
+      impact.classList.remove("show");
+      feedback.textContent = "";
+      feedback.className = "feedback";
+      updateAnswerDisplay();
+      setControls(false);
+      updateScoreText();
+      renderProgress();
+      startRoundTimer();
+    }
+
+    function updateScoreText() {
+      scoreText.textContent = `对 ${correctCount} 错 ${wrongCount}`;
+    }
+
+    function renderProgress() {
+      document.querySelectorAll(".gem").forEach((gem, index) => {
+        gem.classList.remove("done", "miss");
+        if (results[index] === true) {
+          gem.classList.add("done");
+        } else if (results[index] === false) {
+          gem.classList.add("miss");
+        }
+      });
+    }
+
+    function updateAnswerDisplay() {
+      answerDisplay.textContent = answerValue || "?";
+      answerDisplay.classList.toggle("empty", !answerValue);
+    }
+
+    function setControls(disabled) {
+      keypadButtons.forEach((button) => {
+        button.disabled = disabled;
+      });
+    }
+
+    function updateTimerDisplay(seconds) {
+      timerText.textContent = `${seconds} 秒`;
+      timerText.classList.toggle("danger", seconds <= 1);
+    }
+
+    function clearRoundTimer() {
+      if (roundTimer) {
+        window.clearTimeout(roundTimer);
+        roundTimer = null;
+      }
+      if (roundTicker) {
+        window.clearInterval(roundTicker);
+        roundTicker = null;
+      }
+      timerText.classList.remove("danger");
+    }
+
+    function startRoundTimer() {
+      clearRoundTimer();
+      let secondsLeft = ROUND_SECONDS;
+      updateTimerDisplay(secondsLeft);
+      roundTicker = window.setInterval(() => {
+        secondsLeft -= 1;
+        updateTimerDisplay(Math.max(0, secondsLeft));
+      }, 1000);
+      roundTimer = window.setTimeout(() => {
+        failRound("timeout");
+      }, ROUND_SECONDS * 1000);
+    }
+
+    function getAudioContext() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) {
+        return null;
+      }
+
+      if (!audioCtx) {
+        audioCtx = new AudioContextClass();
+      }
+
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+
+      return audioCtx;
+    }
+
+    function makeNoiseSource(ctx, duration) {
+      const bufferSize = Math.max(1, Math.floor(ctx.sampleRate * duration));
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i += 1) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+      }
+
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      return source;
+    }
+
+    function makeDistortionCurve(amount) {
+      const samples = 44100;
+      const curve = new Float32Array(samples);
+      const deg = Math.PI / 180;
+      for (let i = 0; i < samples; i += 1) {
+        const x = (i * 2) / samples - 1;
+        curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+      }
+      return curve;
+    }
+
+    function connectLoudMaster(ctx, volume, destination = ctx.destination) {
+      const master = ctx.createGain();
+      const compressor = ctx.createDynamicsCompressor();
+      compressor.threshold.setValueAtTime(-18, ctx.currentTime);
+      compressor.knee.setValueAtTime(18, ctx.currentTime);
+      compressor.ratio.setValueAtTime(8, ctx.currentTime);
+      compressor.attack.setValueAtTime(0.003, ctx.currentTime);
+      compressor.release.setValueAtTime(0.18, ctx.currentTime);
+      master.gain.setValueAtTime(volume, ctx.currentTime);
+      master.connect(compressor);
+      compressor.connect(destination);
+      return master;
+    }
+
+    function playMonsterRoar() {
+      const ctx = getAudioContext();
+      if (!ctx) {
+        return;
+      }
+
+      const now = ctx.currentTime;
+      const master = connectLoudMaster(ctx, 1.3);
+      const distortion = ctx.createWaveShaper();
+      distortion.curve = makeDistortionCurve(90);
+      distortion.oversample = "4x";
+      const roarBus = ctx.createGain();
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(1.3, now + 0.035);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 1.15);
+      roarBus.connect(distortion);
+      distortion.connect(master);
+
+      [0, 0.18, 0.38].forEach((offset, index) => {
+        const osc = ctx.createOscillator();
+        const growl = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        osc.type = index === 1 ? "square" : "sawtooth";
+        osc.frequency.setValueAtTime(230 - index * 28, now + offset);
+        osc.frequency.exponentialRampToValueAtTime(54 + index * 12, now + offset + 0.44);
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(920, now + offset);
+        filter.frequency.exponentialRampToValueAtTime(150, now + offset + 0.46);
+        growl.gain.setValueAtTime(0.0001, now + offset);
+        growl.gain.exponentialRampToValueAtTime(1.05, now + offset + 0.035);
+        growl.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.52);
+        osc.connect(filter);
+        filter.connect(growl);
+        growl.connect(roarBus);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.58);
+      });
+
+      const noise = makeNoiseSource(ctx, 1.05);
+      const noiseFilter = ctx.createBiquadFilter();
+      const noiseGain = ctx.createGain();
+      noiseFilter.type = "bandpass";
+      noiseFilter.frequency.setValueAtTime(360, now);
+      noiseFilter.frequency.exponentialRampToValueAtTime(120, now + 0.9);
+      noiseFilter.Q.setValueAtTime(0.95, now);
+      noiseGain.gain.setValueAtTime(0.0001, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.48, now + 0.05);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.05);
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(roarBus);
+      noise.start(now);
+
+      const drop = ctx.createOscillator();
+      const dropGain = ctx.createGain();
+      drop.type = "sine";
+      drop.frequency.setValueAtTime(80, now + 0.04);
+      drop.frequency.exponentialRampToValueAtTime(28, now + 0.7);
+      dropGain.gain.setValueAtTime(0.0001, now + 0.02);
+      dropGain.gain.exponentialRampToValueAtTime(1.35, now + 0.08);
+      dropGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.78);
+      drop.connect(dropGain);
+      dropGain.connect(master);
+      drop.start(now + 0.02);
+      drop.stop(now + 0.84);
+    }
+
+    function playHeroScream() {
+      const ctx = getAudioContext();
+      if (!ctx) {
+        return;
+      }
+
+      const now = ctx.currentTime;
+      const master = connectLoudMaster(ctx, 1.05);
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(1.05, now + 0.025);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.92);
+
+      const thump = ctx.createOscillator();
+      const thumpGain = ctx.createGain();
+      thump.type = "sine";
+      thump.frequency.setValueAtTime(120, now);
+      thump.frequency.exponentialRampToValueAtTime(34, now + 0.22);
+      thumpGain.gain.setValueAtTime(1.15, now);
+      thumpGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+      thump.connect(thumpGain);
+      thumpGain.connect(master);
+      thump.start(now);
+      thump.stop(now + 0.28);
+
+      [0, 0.018].forEach((offset, index) => {
+        const scream = ctx.createOscillator();
+        const screamGain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        scream.type = index === 0 ? "triangle" : "sawtooth";
+        scream.frequency.setValueAtTime(860 + index * 120, now + 0.04 + offset);
+        scream.frequency.linearRampToValueAtTime(1320 + index * 180, now + 0.16 + offset);
+        scream.frequency.exponentialRampToValueAtTime(330 + index * 60, now + 0.78 + offset);
+        filter.type = "bandpass";
+        filter.frequency.setValueAtTime(1120 + index * 260, now + 0.04 + offset);
+        filter.Q.setValueAtTime(5.5, now);
+        screamGain.gain.setValueAtTime(0.0001, now + 0.03 + offset);
+        screamGain.gain.exponentialRampToValueAtTime(index === 0 ? 0.88 : 0.46, now + 0.1 + offset);
+        screamGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.84 + offset);
+        scream.connect(filter);
+        filter.connect(screamGain);
+        screamGain.connect(master);
+        scream.start(now + 0.03 + offset);
+        scream.stop(now + 0.9 + offset);
+      });
+
+      const crackle = makeNoiseSource(ctx, 0.34);
+      const crackleFilter = ctx.createBiquadFilter();
+      const crackleGain = ctx.createGain();
+      crackleFilter.type = "highpass";
+      crackleFilter.frequency.setValueAtTime(850, now);
+      crackleGain.gain.setValueAtTime(0.0001, now + 0.02);
+      crackleGain.gain.exponentialRampToValueAtTime(0.22, now + 0.05);
+      crackleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
+      crackle.connect(crackleFilter);
+      crackleFilter.connect(crackleGain);
+      crackleGain.connect(master);
+      crackle.start(now + 0.02);
+    }
+
+    function playFinalNote(ctx, start, frequency, duration, type, volume, destination) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+      osc.type = type;
+      osc.frequency.setValueAtTime(frequency, start);
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(2400, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(volume, start + 0.035);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(destination);
+      osc.start(start);
+      osc.stop(start + duration + 0.04);
+    }
+
+    function playFinalMusicBar() {
+      const ctx = getAudioContext();
+      if (!ctx) {
+        return;
+      }
+
+      const now = Math.max(ctx.currentTime + 0.03, finalMusicStopTime - 0.1);
+      const master = connectLoudMaster(ctx, 0.72);
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(0.72, now + 0.08);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 3.9);
+      const notes = [523.25, 659.25, 783.99, 1046.5, 987.77, 783.99, 880, 1046.5];
+      notes.forEach((frequency, index) => {
+        playFinalNote(ctx, now + index * 0.22, frequency, 0.34, "triangle", 0.2, master);
+      });
+
+      [261.63, 329.63, 392].forEach((frequency) => {
+        playFinalNote(ctx, now, frequency, 1.55, "sine", 0.16, master);
+      });
+      [349.23, 440, 523.25].forEach((frequency) => {
+        playFinalNote(ctx, now + 1.74, frequency, 1.65, "sine", 0.15, master);
+      });
+
+      [0, 0.88, 1.76, 2.64].forEach((offset) => {
+        const sparkle = makeNoiseSource(ctx, 0.18);
+        const sparkleFilter = ctx.createBiquadFilter();
+        const sparkleGain = ctx.createGain();
+        sparkleFilter.type = "bandpass";
+        sparkleFilter.frequency.setValueAtTime(4200, now + offset);
+        sparkleFilter.Q.setValueAtTime(8, now + offset);
+        sparkleGain.gain.setValueAtTime(0.0001, now + offset);
+        sparkleGain.gain.exponentialRampToValueAtTime(0.13, now + offset + 0.02);
+        sparkleGain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.18);
+        sparkle.connect(sparkleFilter);
+        sparkleFilter.connect(sparkleGain);
+        sparkleGain.connect(master);
+        sparkle.start(now + offset);
+      });
+
+      finalMusicStopTime = now + 3.9;
+    }
+
+    function startFinalMusic() {
+      stopFinalMusic();
+      playFinalMusicBar();
+      finalMusicTimer = window.setInterval(playFinalMusicBar, 3600);
+    }
+
+    function stopFinalMusic() {
+      if (finalMusicTimer) {
+        window.clearInterval(finalMusicTimer);
+        finalMusicTimer = null;
+      }
+      finalMusicStopTime = 0;
+    }
+
+    function submitAnswer() {
+      if (locked || paused || gameOver) {
+        return;
+      }
+
+      if (!answerValue) {
+        feedback.textContent = "快一点，只有 8 秒";
+        feedback.className = "feedback try";
+        return;
+      }
+
+      getAudioContext();
+      const userAnswer = Number(answerValue);
+      if (userAnswer !== problem.answer) {
+        failRound("wrong");
+        return;
+      }
+
+      passRound();
+    }
+
+    function passRound() {
+      if (locked || gameOver) {
+        return;
+      }
+
+      clearRoundTimer();
+      locked = true;
+      correctCount += 1;
+      results[level] = true;
+      updateScoreText();
+      renderProgress();
+      setControls(true);
+      feedback.textContent = "答对了！";
+      feedback.className = "feedback good";
+      answerBubble.textContent = `答案是 ${problem.answer}！`;
+      hero.classList.remove("answering");
+      beam.classList.remove("fire");
+      answerBubble.classList.remove("show");
+      explosion.classList.remove("boom");
+      void hero.offsetWidth;
+      hero.classList.add("answering");
+      beam.classList.add("fire");
+      answerBubble.classList.add("show");
+
+      window.setTimeout(() => {
+        playMonsterRoar();
+        monster.classList.add("defeated");
+        explosion.innerHTML = makeExplosionPieces();
+        explosion.classList.add("boom");
+      }, 430);
+
+      window.setTimeout(() => {
+        advanceRound();
+      }, 1500);
+    }
+
+    function failRound(reason) {
+      if (locked || gameOver) {
+        return;
+      }
+
+      clearRoundTimer();
+      getAudioContext();
+      locked = true;
+      wrongCount += 1;
+      results[level] = false;
+      updateScoreText();
+      renderProgress();
+      setControls(true);
+      feedback.textContent = reason === "timeout" ? "时间到！怪兽反击了" : "答错了！怪兽反击了";
+      feedback.className = "feedback try";
+      monster.classList.remove("hit", "attack");
+      hero.classList.remove("hurt");
+      stage.classList.remove("wrong");
+      impact.classList.remove("show");
+      void monster.offsetWidth;
+      playHeroScream();
+      monster.classList.add("attack");
+      hero.classList.add("hurt");
+      stage.classList.add("wrong");
+      impact.classList.add("show");
+
+      window.setTimeout(() => {
+        monster.classList.remove("attack");
+        hero.classList.remove("hurt");
+        stage.classList.remove("wrong");
+        impact.classList.remove("show");
+        advanceRound();
+      }, 920);
+    }
+
+    function advanceRound() {
+      level += 1;
+      if (wrongCount >= 2) {
+        showDefeat();
+        return;
+      }
+
+      if (level >= TOTAL_QUESTIONS) {
+        if (correctCount >= 3) {
+          showFinale();
+        } else {
+          showDefeat();
+        }
+        return;
+      }
+
+      renderLevel();
+    }
+
+    function makeExplosionPieces() {
+      return Array.from({ length: 18 }, (_, index) => {
+        const r = index * 20;
+        const d = randomInt(28, 78);
+        return `<span style="--r:${r}deg;--d:${d}px"></span>`;
+      }).join("");
+    }
+
+    function showFinale() {
+      gameOver = true;
+      clearRoundTimer();
+      finale.classList.add("show");
+      finale.setAttribute("aria-hidden", "false");
+      startFireworks();
+      startFinalMusic();
+    }
+
+    function hideFinale() {
+      finale.classList.remove("show");
+      finale.setAttribute("aria-hidden", "true");
+      stopFireworks();
+      stopFinalMusic();
+    }
+
+    function pauseGame() {
+      if (gameOver || paused) {
+        return;
+      }
+
+      paused = true;
+      locked = true;
+      clearRoundTimer();
+      setControls(true);
+      stopFinalMusic();
+      stopDefeatSounds();
+      stopFireworks();
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      timerText.textContent = "暂停";
+      feedback.textContent = "游戏已暂停";
+      feedback.className = "feedback try";
+      pauseOverlay.classList.add("show");
+      pauseOverlay.setAttribute("aria-hidden", "false");
+    }
+
+    function resumeGame() {
+      if (gameOver || !paused) {
+        return;
+      }
+
+      paused = false;
+      locked = false;
+      pauseOverlay.classList.remove("show");
+      pauseOverlay.setAttribute("aria-hidden", "true");
+      feedback.textContent = "";
+      feedback.className = "feedback";
+      setControls(false);
+      startRoundTimer();
+    }
+
+    function showDefeat() {
+      gameOver = true;
+      clearRoundTimer();
+      stopFinalMusic();
+      setControls(true);
+      defeat.classList.add("show");
+      defeat.setAttribute("aria-hidden", "false");
+      playDefeatSounds();
+      shoutComeOn();
+    }
+
+    function hideDefeat() {
+      defeat.classList.remove("show");
+      defeat.setAttribute("aria-hidden", "true");
+      stopDefeatSounds();
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function playDefeatSounds() {
+      stopDefeatSounds();
+      playHeroScream();
+      window.setTimeout(playMonsterRoar, 120);
+      window.setTimeout(playHeroScream, 520);
+      defeatScreamTimer = window.setInterval(playHeroScream, 1250);
+      defeatRoarTimer = window.setInterval(playMonsterRoar, 2400);
+    }
+
+    function stopDefeatSounds() {
+      if (defeatScreamTimer) {
+        window.clearInterval(defeatScreamTimer);
+        defeatScreamTimer = null;
+      }
+      if (defeatRoarTimer) {
+        window.clearInterval(defeatRoarTimer);
+        defeatRoarTimer = null;
+      }
+    }
+
+    function shoutComeOn() {
+      if (!("speechSynthesis" in window)) {
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance("我的妈呀，你太笨了");
+      utterance.lang = "zh-CN";
+      utterance.volume = 1;
+      utterance.rate = 0.82;
+      utterance.pitch = 1.25;
+      window.setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+      }, 450);
+    }
+
+    function appendDigit(digit) {
+      if (locked || paused || gameOver || answerValue.length >= 2) {
+        return;
+      }
+      if (answerValue === "0") {
+        answerValue = digit;
+      } else {
+        answerValue += digit;
+      }
+      updateAnswerDisplay();
+      feedback.textContent = "";
+      feedback.className = "feedback";
+    }
+
+    function clearAnswer() {
+      if (locked || paused || gameOver) {
+        return;
+      }
+      answerValue = "";
+      updateAnswerDisplay();
+      feedback.textContent = "";
+      feedback.className = "feedback";
+    }
+
+    function resetGame() {
+      clearRoundTimer();
+      hideFinale();
+      hideDefeat();
+      pauseOverlay.classList.remove("show");
+      pauseOverlay.setAttribute("aria-hidden", "true");
+      level = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      results = [];
+      answerValue = "";
+      locked = false;
+      paused = false;
+      gameOver = false;
+      renderLevel();
+    }
+
+    document.querySelectorAll("[data-key]").forEach((button) => {
+      button.addEventListener("click", () => appendDigit(button.dataset.key));
+    });
+    pauseBtn.addEventListener("click", pauseGame);
+    resumeBtn.addEventListener("click", resumeGame);
+    submitBtn.addEventListener("click", submitAnswer);
+    clearBtn.addEventListener("click", clearAnswer);
+    restartBtn.addEventListener("click", resetGame);
+    defeatRestartBtn.addEventListener("click", resetGame);
+
+    window.addEventListener("keydown", (event) => {
+      if (gameOver || paused) {
+        return;
+      }
+
+      if (/^\d$/.test(event.key)) {
+        appendDigit(event.key);
+      } else if (event.key === "Backspace" || event.key === "Delete") {
+        if (locked) {
+          return;
+        }
+        answerValue = answerValue.slice(0, -1);
+        updateAnswerDisplay();
+      } else if (event.key === "Enter") {
+        submitAnswer();
+      }
+    });
+
+    function sizeCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      fireworksCanvas.width = Math.floor(window.innerWidth * ratio);
+      fireworksCanvas.height = Math.floor(window.innerHeight * ratio);
+      fireworksCanvas.style.width = `${window.innerWidth}px`;
+      fireworksCanvas.style.height = `${window.innerHeight}px`;
+      fireworksCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    function launchFirework() {
+      const x = randomInt(60, Math.max(70, window.innerWidth - 60));
+      const y = randomInt(70, Math.max(80, Math.floor(window.innerHeight * 0.58)));
+      const palette = ["#ffd45a", "#34d9ff", "#ff6fcf", "#62e381", "#ff9045", "#fff8e8"];
+      const color = palette[randomInt(0, palette.length - 1)];
+      for (let i = 0; i < 42; i += 1) {
+        const angle = (Math.PI * 2 * i) / 42;
+        const speed = Math.random() * 4.2 + 1.5;
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1,
+          color,
+          size: Math.random() * 2.8 + 2
+        });
+      }
+    }
+
+    function drawFireworks() {
+      fireworksCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      fireworksCtx.globalCompositeOperation = "lighter";
+      particles = particles.filter((p) => p.life > 0.02);
+      particles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.035;
+        p.life *= 0.965;
+        fireworksCtx.globalAlpha = p.life;
+        fireworksCtx.fillStyle = p.color;
+        fireworksCtx.beginPath();
+        fireworksCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        fireworksCtx.fill();
+      });
+      fireworksCtx.globalAlpha = 1;
+      fireworksCtx.globalCompositeOperation = "source-over";
+    }
+
+    function startFireworks() {
+      sizeCanvas();
+      particles = [];
+      launchFirework();
+      launchFirework();
+      let frame = 0;
+      stopFireworks();
+      fireworksTimer = window.setInterval(() => {
+        frame += 1;
+        if (frame % 12 === 0) {
+          launchFirework();
+        }
+        drawFireworks();
+      }, 1000 / 30);
+    }
+
+    function stopFireworks() {
+      if (fireworksTimer) {
+        window.clearInterval(fireworksTimer);
+        fireworksTimer = null;
+      }
+      fireworksCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    }
+
+    window.addEventListener("resize", () => {
+      if (finale.classList.contains("show")) {
+        sizeCanvas();
+      }
+    });
+
+    renderLevel();
+    pauseGame();
+  </script>
+</body>
+</html>
