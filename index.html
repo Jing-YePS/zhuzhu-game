@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>银河奥特曼数学打怪兽</title>
+  <title>欧布奥特曼数学打怪兽</title>
   <style>
     :root {
       color-scheme: dark;
@@ -973,7 +973,7 @@
       width: 160px;
       height: 52px;
       border-radius: 8px;
-      background: linear-gradient(90deg, #f1f6ff 0 22%, #f74754 22% 78%, #f1f6ff 78%);
+      background: linear-gradient(90deg, #f1f6ff 0 18%, #141620 18% 42%, #f74754 42% 58%, #141620 58% 82%, #f1f6ff 82%);
       border: 4px solid rgba(255, 255, 255, 0.86);
     }
 
@@ -1007,7 +1007,7 @@
       width: 78px;
       height: 26px;
       border-radius: 8px;
-      background: #f1f6ff;
+      background: #141620;
       border: 4px solid rgba(255, 255, 255, 0.86);
     }
 
@@ -1340,12 +1340,12 @@
   </style>
 </head>
 <body>
-  <main class="game" aria-label="银河奥特曼数学打怪兽">
+  <main class="game" aria-label="欧布奥特曼数学打怪兽">
     <div class="stars"></div>
 
     <header class="topbar">
       <div class="brand">
-        <h1>银河奥特曼数学打怪兽</h1>
+        <h1>欧布奥特曼数学打怪兽</h1>
         <p class="subtitle">50 以内加减法挑战</p>
       </div>
       <div class="scoreboard" aria-label="通关进度">
@@ -1369,7 +1369,7 @@
       <div class="stage">
         <div class="hero-side">
           <div class="hero-wrap" id="hero">
-            <svg class="hero-svg" viewBox="0 0 220 310" role="img" aria-label="银河奥特曼">
+            <svg class="hero-svg" viewBox="0 0 220 310" role="img" aria-label="欧布奥特曼">
               <defs>
                 <linearGradient id="silver" x1="0" x2="1" y1="0" y2="1">
                   <stop stop-color="#ffffff" offset="0"/>
@@ -1377,41 +1377,50 @@
                   <stop stop-color="#aebdce" offset="1"/>
                 </linearGradient>
                 <linearGradient id="redSuit" x1="0" x2="1">
-                  <stop stop-color="#ff6b72" offset="0"/>
-                  <stop stop-color="#d61838" offset="1"/>
+                  <stop stop-color="#ff4a58" offset="0"/>
+                  <stop stop-color="#b40722" offset="1"/>
+                </linearGradient>
+                <linearGradient id="orbDark" x1="0" x2="1" y1="0" y2="1">
+                  <stop stop-color="#3c3d4c" offset="0"/>
+                  <stop stop-color="#141620" offset=".58"/>
+                  <stop stop-color="#05060a" offset="1"/>
                 </linearGradient>
                 <linearGradient id="blueCrystal" x1="0" x2="1" y1="0" y2="1">
                   <stop stop-color="#b7fbff" offset="0"/>
-                  <stop stop-color="#22cdf8" offset=".55"/>
-                  <stop stop-color="#1170ff" offset="1"/>
+                  <stop stop-color="#39e6ff" offset=".48"/>
+                  <stop stop-color="#1457ff" offset="1"/>
                 </linearGradient>
               </defs>
               <ellipse cx="108" cy="292" rx="74" ry="13" fill="rgba(0,0,0,.28)"/>
-              <path d="M109 8 136 38 129 87 111 104 91 87 84 38z" fill="url(#silver)" stroke="#f9fbff" stroke-width="5"/>
-              <path d="M87 43 61 58 83 70z" fill="url(#silver)" stroke="#f9fbff" stroke-width="4"/>
-              <path d="M132 43 159 58 137 70z" fill="url(#silver)" stroke="#f9fbff" stroke-width="4"/>
-              <path d="M93 61c10-9 23-9 33 0-5 11-28 11-33 0z" fill="#fff5a6"/>
-              <path d="M89 91h42l20 92-22 70H91l-22-70z" fill="url(#redSuit)" stroke="#f5f8ff" stroke-width="5"/>
-              <path d="M110 98 92 171l18 69 18-69z" fill="url(#silver)" opacity=".96"/>
-              <path d="M70 108 37 151 55 169 85 136z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
-              <path d="M147 108 188 133 177 155 135 136z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
-              <path d="M54 168 34 206 51 217 72 176z" fill="url(#redSuit)" stroke="#f5f8ff" stroke-width="4"/>
-              <path d="M176 155 193 195 174 203 158 164z" fill="url(#redSuit)" stroke="#f5f8ff" stroke-width="4"/>
-              <path d="M92 249 74 292 94 298 111 255z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
-              <path d="M126 249 143 292 123 298 108 255z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
-              <path d="M95 270h-28c-10 0-14 9-8 17 11 8 29 8 42 2z" fill="#ff4859"/>
-              <path d="M124 270h28c10 0 14 9 8 17-11 8-29 8-42 2z" fill="#ff4859"/>
-              <path class="hero-core" d="M110 120 128 142 118 168h-17l-10-26z" fill="url(#blueCrystal)" stroke="#e7feff" stroke-width="4"/>
-              <path d="M106 16 114 16 112 47 108 47z" fill="#34d9ff"/>
+              <path d="M109 8 138 40 130 86 111 105 91 86 82 40z" fill="url(#silver)" stroke="#f9fbff" stroke-width="5"/>
+              <path d="M88 40 57 58 84 72z" fill="url(#silver)" stroke="#f9fbff" stroke-width="4"/>
+              <path d="M131 40 163 58 136 72z" fill="url(#silver)" stroke="#f9fbff" stroke-width="4"/>
+              <path d="M101 15 118 15 114 51 106 51z" fill="#15131f"/>
+              <path d="M92 58c12-10 25-10 37 0-7 13-30 13-37 0z" fill="#fff5a6"/>
+              <path d="M89 91h42l20 92-22 70H91l-22-70z" fill="url(#orbDark)" stroke="#f5f8ff" stroke-width="5"/>
+              <path d="M91 98 69 183 92 248 108 173z" fill="url(#redSuit)" opacity=".98"/>
+              <path d="M129 98 151 183 128 248 112 173z" fill="url(#redSuit)" opacity=".98"/>
+              <path d="M110 101 91 141l19 31 19-31z" fill="url(#silver)" opacity=".95"/>
+              <path d="M91 178 110 238 129 178 110 198z" fill="url(#silver)" opacity=".95"/>
+              <path d="M69 108 35 148 53 170 84 136z" fill="url(#orbDark)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M149 108 187 133 177 158 136 136z" fill="url(#orbDark)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M54 168 35 207 53 219 74 176z" fill="url(#redSuit)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M176 158 194 197 174 205 158 165z" fill="url(#redSuit)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M92 249 74 292 94 298 111 255z" fill="url(#orbDark)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M126 249 143 292 123 298 108 255z" fill="url(#orbDark)" stroke="#f5f8ff" stroke-width="4"/>
+              <path d="M95 270h-28c-10 0-14 9-8 17 11 8 29 8 42 2z" fill="#15131f" stroke="#ff4050" stroke-width="4"/>
+              <path d="M124 270h28c10 0 14 9 8 17-11 8-29 8-42 2z" fill="#15131f" stroke="#ff4050" stroke-width="4"/>
+              <circle class="hero-core" cx="110" cy="148" r="19" fill="url(#blueCrystal)" stroke="#e7feff" stroke-width="5"/>
+              <path d="M110 22 117 44 110 64 103 44z" fill="#34d9ff"/>
             </svg>
-            <div class="hero-name">银河奥特曼</div>
+            <div class="hero-name">欧布奥特曼</div>
           </div>
         </div>
 
         <div class="question-zone">
           <div class="round-tools">
             <div class="level-pill" id="levelText">第 1 题</div>
-            <div class="timer-pill" id="timerText">8 秒</div>
+            <div class="timer-pill" id="timerText">15 秒</div>
             <div class="score-pill" id="scoreText">对 0 错 0</div>
           </div>
           <div class="speech" aria-live="polite">
@@ -1528,7 +1537,7 @@
     ];
 
     const TOTAL_QUESTIONS = 4;
-    const ROUND_SECONDS = 8;
+    const ROUND_SECONDS = 15;
 
     const levelText = document.getElementById("levelText");
     const timerText = document.getElementById("timerText");
@@ -1969,7 +1978,7 @@
       }
 
       if (!answerValue) {
-        feedback.textContent = "快一点，只有 8 秒";
+        feedback.textContent = "快一点，只有 15 秒";
         feedback.className = "feedback try";
         return;
       }
