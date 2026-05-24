@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>欧布奥特曼数学打怪兽</title>
+  <title>奥特曼三关数学打怪兽</title>
   <style>
     :root {
       color-scheme: dark;
@@ -1340,12 +1340,12 @@
   </style>
 </head>
 <body>
-  <main class="game" aria-label="欧布奥特曼数学打怪兽">
+  <main class="game" aria-label="奥特曼三关数学打怪兽">
     <div class="stars"></div>
 
     <header class="topbar">
       <div class="brand">
-        <h1>欧布奥特曼数学打怪兽</h1>
+        <h1 id="brandTitle">第一关：欧布奥特曼数学打怪兽</h1>
         <p class="subtitle">50 以内加减法挑战</p>
       </div>
       <div class="scoreboard" aria-label="通关进度">
@@ -1369,7 +1369,7 @@
       <div class="stage">
         <div class="hero-side">
           <div class="hero-wrap" id="hero">
-            <svg class="hero-svg" viewBox="0 0 220 310" role="img" aria-label="欧布奥特曼">
+            <svg class="hero-svg" id="heroSvg" viewBox="0 0 220 310" role="img" aria-label="欧布奥特曼">
               <defs>
                 <linearGradient id="silver" x1="0" x2="1" y1="0" y2="1">
                   <stop stop-color="#ffffff" offset="0"/>
@@ -1413,7 +1413,7 @@
               <circle class="hero-core" cx="110" cy="148" r="19" fill="url(#blueCrystal)" stroke="#e7feff" stroke-width="5"/>
               <path d="M110 22 117 44 110 64 103 44z" fill="#34d9ff"/>
             </svg>
-            <div class="hero-name">欧布奥特曼</div>
+            <div class="hero-name" id="heroName">欧布奥特曼</div>
           </div>
         </div>
 
@@ -1468,8 +1468,8 @@
   <section class="finale" id="finale" aria-hidden="true">
     <canvas id="fireworks"></canvas>
     <div class="final-card">
-      <h2>太棒了，zhuzhu！</h2>
-      <button class="restart" id="restartBtn" type="button">再玩一次</button>
+      <h2 id="finalTitle">进入第二关</h2>
+      <button class="restart" id="restartBtn" type="button">继续</button>
     </div>
   </section>
 
@@ -1505,40 +1505,54 @@
   </section>
 
   <script>
-    const monsters = [
+    const TOTAL_QUESTIONS = 4;
+    const PASS_COUNT = 3;
+    const chapters = [
       {
-        name: "岩角怪兽",
-        main: "#7f5cff",
-        belly: "#ffd45a",
-        spike: "#fff8e8",
-        eye: "#95ffac"
+        name: "第一关",
+        heroKey: "orb",
+        heroName: "欧布奥特曼",
+        seconds: 15,
+        clearText: "进入第二关",
+        clearButton: "开始第二关",
+        monsters: [
+          { name: "岩角怪兽", main: "#7f5cff", belly: "#ffd45a", spike: "#fff8e8", eye: "#95ffac" },
+          { name: "泡泡怪兽", main: "#34d9ff", belly: "#ff6fcf", spike: "#fff8e8", eye: "#ffd45a" },
+          { name: "火焰怪兽", main: "#ff7c43", belly: "#62e381", spike: "#2b2432", eye: "#fff8e8" },
+          { name: "星爪怪兽", main: "#62e381", belly: "#7f5cff", spike: "#ffd45a", eye: "#ff6fcf" }
+        ]
       },
       {
-        name: "泡泡怪兽",
-        main: "#34d9ff",
-        belly: "#ff6fcf",
-        spike: "#fff8e8",
-        eye: "#ffd45a"
+        name: "第二关",
+        heroKey: "ginga",
+        heroName: "银河奥特曼",
+        seconds: 12,
+        clearText: "进入第三关",
+        clearButton: "开始第三关",
+        monsters: [
+          { name: "雷爪怪兽", main: "#4057ff", belly: "#ffd45a", spike: "#b7fbff", eye: "#95ffac" },
+          { name: "冰牙怪兽", main: "#38d4ff", belly: "#e8f8ff", spike: "#21344f", eye: "#ffef73" },
+          { name: "毒藤怪兽", main: "#5fca6b", belly: "#7f5cff", spike: "#fff8e8", eye: "#ff6fcf" },
+          { name: "钢甲怪兽", main: "#8a92a6", belly: "#ff9045", spike: "#d7e2ef", eye: "#34d9ff" }
+        ]
       },
       {
-        name: "火焰怪兽",
-        main: "#ff7c43",
-        belly: "#62e381",
-        spike: "#2b2432",
-        eye: "#fff8e8"
-      },
-      {
-        name: "星爪怪兽",
-        main: "#62e381",
-        belly: "#7f5cff",
-        spike: "#ffd45a",
-        eye: "#ff6fcf"
+        name: "第三关",
+        heroKey: "zero",
+        heroName: "塞罗奥特曼",
+        seconds: 10,
+        clearText: "zhuzhu最棒！",
+        clearButton: "再玩一次",
+        monsters: [
+          { name: "暗影怪兽", main: "#2b2432", belly: "#ff6fcf", spike: "#ffd45a", eye: "#95ffac" },
+          { name: "熔岩怪兽", main: "#ff4d36", belly: "#ffd45a", spike: "#15131f", eye: "#fff8e8" },
+          { name: "磁力怪兽", main: "#4466a8", belly: "#62e381", spike: "#e8f8ff", eye: "#ffd45a" },
+          { name: "终极怪兽", main: "#7f2dff", belly: "#34d9ff", spike: "#ffef73", eye: "#ff6fcf" }
+        ]
       }
     ];
 
-    const TOTAL_QUESTIONS = 4;
-    const ROUND_SECONDS = 15;
-
+    const brandTitle = document.getElementById("brandTitle");
     const levelText = document.getElementById("levelText");
     const timerText = document.getElementById("timerText");
     const scoreText = document.getElementById("scoreText");
@@ -1549,6 +1563,8 @@
     const stage = document.querySelector(".stage");
     const monster = document.getElementById("monster");
     const hero = document.getElementById("hero");
+    const heroSvg = document.getElementById("heroSvg");
+    const heroName = document.getElementById("heroName");
     const beam = document.getElementById("beam");
     const explosion = document.getElementById("explosion");
     const answerBubble = document.getElementById("answerBubble");
@@ -1560,6 +1576,7 @@
     const clearBtn = document.getElementById("clearBtn");
     const keypadButtons = [...document.querySelectorAll(".key, .action")];
     const finale = document.getElementById("finale");
+    const finalTitle = document.getElementById("finalTitle");
     const defeat = document.getElementById("defeat");
     const pauseOverlay = document.getElementById("pauseOverlay");
     const restartBtn = document.getElementById("restartBtn");
@@ -1568,6 +1585,7 @@
     const fireworksCanvas = document.getElementById("fireworks");
     const fireworksCtx = fireworksCanvas.getContext("2d");
 
+    let currentChapter = 0;
     let level = 0;
     let correctCount = 0;
     let wrongCount = 0;
@@ -1577,6 +1595,7 @@
     let locked = false;
     let paused = false;
     let gameOver = false;
+    let pendingChapterAdvance = false;
     let roundTimer = null;
     let roundTicker = null;
     let fireworksTimer = null;
@@ -1602,6 +1621,143 @@
 
     function randomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function heroMarkup(kind) {
+      if (kind === "ginga") {
+        return `
+          <defs>
+            <linearGradient id="silver" x1="0" x2="1" y1="0" y2="1">
+              <stop stop-color="#ffffff" offset="0"/>
+              <stop stop-color="#d7e2ef" offset=".52"/>
+              <stop stop-color="#aebdce" offset="1"/>
+            </linearGradient>
+            <linearGradient id="gingaRed" x1="0" x2="1">
+              <stop stop-color="#ff6b72" offset="0"/>
+              <stop stop-color="#d61838" offset="1"/>
+            </linearGradient>
+            <linearGradient id="blueCrystal" x1="0" x2="1" y1="0" y2="1">
+              <stop stop-color="#b7fbff" offset="0"/>
+              <stop stop-color="#22cdf8" offset=".55"/>
+              <stop stop-color="#1170ff" offset="1"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="108" cy="292" rx="74" ry="13" fill="rgba(0,0,0,.28)"/>
+          <path d="M109 8 136 38 129 87 111 104 91 87 84 38z" fill="url(#silver)" stroke="#f9fbff" stroke-width="5"/>
+          <path d="M87 43 61 58 83 70z" fill="url(#silver)" stroke="#f9fbff" stroke-width="4"/>
+          <path d="M132 43 159 58 137 70z" fill="url(#silver)" stroke="#f9fbff" stroke-width="4"/>
+          <path d="M93 61c10-9 23-9 33 0-5 11-28 11-33 0z" fill="#fff5a6"/>
+          <path d="M89 91h42l20 92-22 70H91l-22-70z" fill="url(#gingaRed)" stroke="#f5f8ff" stroke-width="5"/>
+          <path d="M110 98 92 171l18 69 18-69z" fill="url(#silver)" opacity=".96"/>
+          <path d="M70 108 37 151 55 169 85 136z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M147 108 188 133 177 155 135 136z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M54 168 34 206 51 217 72 176z" fill="url(#gingaRed)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M176 155 193 195 174 203 158 164z" fill="url(#gingaRed)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M92 249 74 292 94 298 111 255z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M126 249 143 292 123 298 108 255z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M95 270h-28c-10 0-14 9-8 17 11 8 29 8 42 2z" fill="#ff4859"/>
+          <path d="M124 270h28c10 0 14 9 8 17-11 8-29 8-42 2z" fill="#ff4859"/>
+          <path class="hero-core" d="M110 120 128 142 118 168h-17l-10-26z" fill="url(#blueCrystal)" stroke="#e7feff" stroke-width="4"/>
+          <path d="M106 16 114 16 112 47 108 47z" fill="#34d9ff"/>
+        `;
+      }
+
+      if (kind === "zero") {
+        return `
+          <defs>
+            <linearGradient id="silver" x1="0" x2="1" y1="0" y2="1">
+              <stop stop-color="#ffffff" offset="0"/>
+              <stop stop-color="#d7e2ef" offset=".55"/>
+              <stop stop-color="#aebdce" offset="1"/>
+            </linearGradient>
+            <linearGradient id="zeroBlue" x1="0" x2="1" y1="0" y2="1">
+              <stop stop-color="#62e8ff" offset="0"/>
+              <stop stop-color="#2066ff" offset=".56"/>
+              <stop stop-color="#0e247a" offset="1"/>
+            </linearGradient>
+            <linearGradient id="zeroRed" x1="0" x2="1">
+              <stop stop-color="#ff6b72" offset="0"/>
+              <stop stop-color="#d61838" offset="1"/>
+            </linearGradient>
+            <linearGradient id="blueCrystal" x1="0" x2="1" y1="0" y2="1">
+              <stop stop-color="#b7fbff" offset="0"/>
+              <stop stop-color="#39e6ff" offset=".48"/>
+              <stop stop-color="#1457ff" offset="1"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="108" cy="292" rx="74" ry="13" fill="rgba(0,0,0,.28)"/>
+          <path d="M109 8 138 42 130 88 111 106 90 88 82 42z" fill="url(#silver)" stroke="#f9fbff" stroke-width="5"/>
+          <path d="M88 41 49 24 69 67z" fill="url(#zeroBlue)" stroke="#f9fbff" stroke-width="4"/>
+          <path d="M131 41 171 24 151 67z" fill="url(#zeroBlue)" stroke="#f9fbff" stroke-width="4"/>
+          <path d="M101 15 118 15 114 50 106 50z" fill="#34d9ff"/>
+          <path d="M92 59c12-10 25-10 37 0-7 13-30 13-37 0z" fill="#fff5a6"/>
+          <path d="M88 91h44l20 92-22 70H90l-22-70z" fill="url(#zeroBlue)" stroke="#f5f8ff" stroke-width="5"/>
+          <path d="M110 96 91 154l19 21 19-21z" fill="url(#silver)" opacity=".96"/>
+          <path d="M88 101 69 185 91 248 110 178z" fill="url(#zeroRed)" opacity=".98"/>
+          <path d="M132 101 151 185 129 248 110 178z" fill="url(#zeroRed)" opacity=".98"/>
+          <path d="M68 108 34 150 54 170 85 136z" fill="url(#zeroBlue)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M149 108 188 134 176 158 135 136z" fill="url(#zeroBlue)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M54 168 34 207 52 219 73 176z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M176 158 194 197 174 205 158 165z" fill="url(#silver)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M92 249 74 292 94 298 111 255z" fill="url(#zeroBlue)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M126 249 143 292 123 298 108 255z" fill="url(#zeroBlue)" stroke="#f5f8ff" stroke-width="4"/>
+          <path d="M95 270h-28c-10 0-14 9-8 17 11 8 29 8 42 2z" fill="#2066ff"/>
+          <path d="M124 270h28c10 0 14 9 8 17-11 8-29 8-42 2z" fill="#2066ff"/>
+          <circle class="hero-core" cx="110" cy="145" r="17" fill="url(#blueCrystal)" stroke="#e7feff" stroke-width="5"/>
+        `;
+      }
+
+      return `
+        <defs>
+          <linearGradient id="silver" x1="0" x2="1" y1="0" y2="1">
+            <stop stop-color="#ffffff" offset="0"/>
+            <stop stop-color="#d7e2ef" offset=".52"/>
+            <stop stop-color="#aebdce" offset="1"/>
+          </linearGradient>
+          <linearGradient id="redSuit" x1="0" x2="1">
+            <stop stop-color="#ff4a58" offset="0"/>
+            <stop stop-color="#b40722" offset="1"/>
+          </linearGradient>
+          <linearGradient id="orbDark" x1="0" x2="1" y1="0" y2="1">
+            <stop stop-color="#3c3d4c" offset="0"/>
+            <stop stop-color="#141620" offset=".58"/>
+            <stop stop-color="#05060a" offset="1"/>
+          </linearGradient>
+          <linearGradient id="blueCrystal" x1="0" x2="1" y1="0" y2="1">
+            <stop stop-color="#b7fbff" offset="0"/>
+            <stop stop-color="#39e6ff" offset=".48"/>
+            <stop stop-color="#1457ff" offset="1"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="108" cy="292" rx="74" ry="13" fill="rgba(0,0,0,.28)"/>
+        <path d="M109 8 138 40 130 86 111 105 91 86 82 40z" fill="url(#silver)" stroke="#f9fbff" stroke-width="5"/>
+        <path d="M88 40 57 58 84 72z" fill="url(#silver)" stroke="#f9fbff" stroke-width="4"/>
+        <path d="M131 40 163 58 136 72z" fill="url(#silver)" stroke="#f9fbff" stroke-width="4"/>
+        <path d="M101 15 118 15 114 51 106 51z" fill="#15131f"/>
+        <path d="M92 58c12-10 25-10 37 0-7 13-30 13-37 0z" fill="#fff5a6"/>
+        <path d="M89 91h42l20 92-22 70H91l-22-70z" fill="url(#orbDark)" stroke="#f5f8ff" stroke-width="5"/>
+        <path d="M91 98 69 183 92 248 108 173z" fill="url(#redSuit)" opacity=".98"/>
+        <path d="M129 98 151 183 128 248 112 173z" fill="url(#redSuit)" opacity=".98"/>
+        <path d="M110 101 91 141l19 31 19-31z" fill="url(#silver)" opacity=".95"/>
+        <path d="M91 178 110 238 129 178 110 198z" fill="url(#silver)" opacity=".95"/>
+        <path d="M69 108 35 148 53 170 84 136z" fill="url(#orbDark)" stroke="#f5f8ff" stroke-width="4"/>
+        <path d="M149 108 187 133 177 158 136 136z" fill="url(#orbDark)" stroke="#f5f8ff" stroke-width="4"/>
+        <path d="M54 168 35 207 53 219 74 176z" fill="url(#redSuit)" stroke="#f5f8ff" stroke-width="4"/>
+        <path d="M176 158 194 197 174 205 158 165z" fill="url(#redSuit)" stroke="#f5f8ff" stroke-width="4"/>
+        <path d="M92 249 74 292 94 298 111 255z" fill="url(#orbDark)" stroke="#f5f8ff" stroke-width="4"/>
+        <path d="M126 249 143 292 123 298 108 255z" fill="url(#orbDark)" stroke="#f5f8ff" stroke-width="4"/>
+        <path d="M95 270h-28c-10 0-14 9-8 17 11 8 29 8 42 2z" fill="#15131f" stroke="#ff4050" stroke-width="4"/>
+        <path d="M124 270h28c10 0 14 9 8 17-11 8-29 8-42 2z" fill="#15131f" stroke="#ff4050" stroke-width="4"/>
+        <circle class="hero-core" cx="110" cy="148" r="19" fill="url(#blueCrystal)" stroke="#e7feff" stroke-width="5"/>
+        <path d="M110 22 117 44 110 64 103 44z" fill="#34d9ff"/>
+      `;
+    }
+
+    function renderHero(chapter) {
+      heroSvg.innerHTML = heroMarkup(chapter.heroKey);
+      heroSvg.setAttribute("aria-label", chapter.heroName);
+      heroName.textContent = chapter.heroName;
+      brandTitle.textContent = `${chapter.name}：${chapter.heroName}数学打怪兽`;
     }
 
     function monsterMarkup(config, index) {
@@ -1636,11 +1792,13 @@
         return;
       }
 
-      const config = monsters[level];
+      const chapter = chapters[currentChapter];
+      const config = chapter.monsters[level];
       problem = makeProblem();
       answerValue = "";
       locked = false;
-      levelText.textContent = `第 ${level + 1}/${TOTAL_QUESTIONS} 题`;
+      renderHero(chapter);
+      levelText.textContent = `${chapter.name} ${level + 1}/${TOTAL_QUESTIONS} 题`;
       monsterLine.textContent = `${config.name} 出题`;
       problemText.textContent = `${problem.a} ${problem.op} ${problem.b} = ?`;
       monsterName.textContent = config.name;
@@ -1706,7 +1864,8 @@
 
     function startRoundTimer() {
       clearRoundTimer();
-      let secondsLeft = ROUND_SECONDS;
+      const secondsForRound = chapters[currentChapter].seconds;
+      let secondsLeft = secondsForRound;
       updateTimerDisplay(secondsLeft);
       roundTicker = window.setInterval(() => {
         secondsLeft -= 1;
@@ -1714,7 +1873,7 @@
       }, 1000);
       roundTimer = window.setTimeout(() => {
         failRound("timeout");
-      }, ROUND_SECONDS * 1000);
+      }, secondsForRound * 1000);
     }
 
     function getAudioContext() {
@@ -1978,7 +2137,7 @@
       }
 
       if (!answerValue) {
-        feedback.textContent = "快一点，只有 15 秒";
+        feedback.textContent = `快一点，只有 ${chapters[currentChapter].seconds} 秒`;
         feedback.className = "feedback try";
         return;
       }
@@ -2072,8 +2231,8 @@
       }
 
       if (level >= TOTAL_QUESTIONS) {
-        if (correctCount >= 3) {
-          showFinale();
+        if (correctCount >= PASS_COUNT) {
+          showChapterClear();
         } else {
           showDefeat();
         }
@@ -2091,13 +2250,22 @@
       }).join("");
     }
 
-    function showFinale() {
+    function showChapterClear() {
+      const chapter = chapters[currentChapter];
       gameOver = true;
       clearRoundTimer();
+      pendingChapterAdvance = currentChapter < chapters.length - 1;
+      finalTitle.textContent = chapter.clearText;
+      restartBtn.textContent = chapter.clearButton;
       finale.classList.add("show");
       finale.setAttribute("aria-hidden", "false");
-      startFireworks();
-      startFinalMusic();
+      if (pendingChapterAdvance) {
+        stopFireworks();
+        stopFinalMusic();
+      } else {
+        startFireworks();
+        startFinalMusic();
+      }
     }
 
     function hideFinale() {
@@ -2105,6 +2273,7 @@
       finale.setAttribute("aria-hidden", "true");
       stopFireworks();
       stopFinalMusic();
+      pendingChapterAdvance = false;
     }
 
     function pauseGame() {
@@ -2224,7 +2393,7 @@
       feedback.className = "feedback";
     }
 
-    function resetGame() {
+    function resetCurrentChapter() {
       clearRoundTimer();
       hideFinale();
       hideDefeat();
@@ -2241,6 +2410,20 @@
       renderLevel();
     }
 
+    function resetGame() {
+      currentChapter = 0;
+      resetCurrentChapter();
+    }
+
+    function continueAfterClear() {
+      if (pendingChapterAdvance) {
+        currentChapter += 1;
+        resetCurrentChapter();
+      } else {
+        resetGame();
+      }
+    }
+
     document.querySelectorAll("[data-key]").forEach((button) => {
       button.addEventListener("click", () => appendDigit(button.dataset.key));
     });
@@ -2248,8 +2431,8 @@
     resumeBtn.addEventListener("click", resumeGame);
     submitBtn.addEventListener("click", submitAnswer);
     clearBtn.addEventListener("click", clearAnswer);
-    restartBtn.addEventListener("click", resetGame);
-    defeatRestartBtn.addEventListener("click", resetGame);
+    restartBtn.addEventListener("click", continueAfterClear);
+    defeatRestartBtn.addEventListener("click", resetCurrentChapter);
 
     window.addEventListener("keydown", (event) => {
       if (gameOver || paused) {
